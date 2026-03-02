@@ -68,14 +68,14 @@ Dependencies can be installed locally using `npm install`.
 Make sure Node.js (v14 or later) is installed.
 
 Check version:
-node -v
+`node -v`
 
 ---
 
 ### 2️⃣ Install dependencies
 
 Inside the project folder:
-npm install
+`npm install`
 
 ---
 
@@ -84,7 +84,7 @@ npm install
 Ensure MongoDB is running locally.
 
 The connection string used:
-mongodb://127.0.0.1:27017/surveyDB
+`mongodb://127.0.0.1:27017/surveyDB`
 
 
 If MongoDB is not running, start it before running the app.
@@ -93,10 +93,11 @@ If MongoDB is not running, start it before running the app.
 
 ### 4️⃣ Run the server
 Development mode:
-npm run dev
+`npm run dev`
 
 Production mode:
-npm start
+`npm start`
+
 ---
 
 ### 5️⃣ Open in Browser
