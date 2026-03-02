@@ -24,36 +24,37 @@ Frontend
 - Bootstrap 5
 - amCharts v5
 
----
-
 ## 📂 Project Structure
+
+```
 TRAVEL-SURVEY/
 │
 ├── models/
-│ └── Survey.js # MongoDB schema
+│   └── Survey.js          # MongoDB schema
 │
 ├── routes/
-│ └── surveyRoutes.js # Express route handlers
+│   └── surveyRoutes.js    # Express route handlers
 │
 ├── public/
-│ ├── css/
-│ │ └── style.css
-│ └── js/
-│ └── iso2ToContinent.js
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── iso2ToContinent.js
 │
 ├── views/
-│ ├── partials/
-│ │ └── navbar.ejs
-│ ├── form.ejs
-│ ├── bar.ejs
-│ ├── pie.ejs
-│ ├── map.ejs
-│ └── success.ejs
+│   ├── partials/
+│   │   └── navbar.ejs
+│   ├── form.ejs
+│   ├── bar.ejs
+│   ├── pie.ejs
+│   ├── map.ejs
+│   └── success.ejs
 │
-├── app.js # Main server file
+├── app.js                 # Main server file
 ├── package.json
 ├── package-lock.json
 └── TravelData.json
+```
 
 
 ---
