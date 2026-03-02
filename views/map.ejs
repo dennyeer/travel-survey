@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dream Destinations Map</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- amCharts -->
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+  <!--  Full ISO2 mapping -->
+  <script src="/js/iso2ToContinent.js"></script>
+
+  <style>
+    #chartdiv {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      background: #ffffff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .map-legend {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      max-width: 260px;
+      font-size: 13px;
+    }
+
+    .legend-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .legend-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+    }
+
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    .legend-value {
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <%- include('partials/navbar') %>
+
+  <div class="container py-4">
+    <a href="/success">← Back</a>
+
+    <div class="card shadow-sm border-0 mt-3">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-2">Dream Destinations by Continent</h1>
+        <p class="text-muted">Hover a country to see continent totals.</p>
+
+        <div style="position:relative;">
+          <div id="chartdiv"></div>
+          <div id="legend" class="map-legend"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ FORMAT SAFE JSON -->
+  <script id="map-data" type="application/json">
+    <%- JSON.stringify(mapData || []) %>
+  </script>
+
+  <script>
+  (function(){
+
+    // ---------- Load data safely ----------
+    var raw = document.getElementById("map-data").textContent || "[]";
+    var mapData = [];
+    try {
+      mapData = JSON.parse(raw);
+    } catch(e) {
+      mapData = [];
+    }
+
+    // ---------- Build continent totals ----------
+    var continentCount = {};
+    mapData.forEach(function(d){
+      var cont = (d.category || "").trim();
+      if(!cont) return;
+      continentCount[cont] = parseInt(d.value || 0);
+    });
+
+    var continents = [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "South America",
+      "Oceania"
+    ];
+
+    // ---------- Color palette ----------
+    function baseColor(cont){
+      const colors = {
+        "Europe": 0x2E86DE,
+        "Asia": 0xE67E22,
+        "North America": 0x27AE60,
+        "South America": 0x16A085,
+        "Africa": 0xF1C40F,
+        "Oceania": 0x8E44AD
+      };
+      return am5.color(colors[cont] || 0xCCCCCC);
+    }
+
+    // ---------- Render HTML legend ----------
+    (function(){
+      var html = '<div class="legend-title">Legend</div>';
+      continents.forEach(function(c){
+        var v = continentCount[c] || 0;
+        var hex = baseColor(c).toCSSHex();
+        html += `
+          <div class="legend-row">
+            <div class="legend-left">
+              <span class="legend-swatch" style="background:${hex}"></span>
+              <span>${c}</span>
+            </div>
+            <span class="legend-value">${v}</span>
+          </div>
+        `;
+      });
+      document.getElementById("legend").innerHTML = html;
+    })();
+
+    // ---------- Map Drawing ----------
+    am5.ready(function(){
+
+      var root = am5.Root.new("chartdiv");
+      root.setThemes([ am5themes_Animated.new(root) ]);
+      if (root._logo) root._logo.dispose();
+
+      var chart = root.container.children.push(
+        am5map.MapChart.new(root, {
+          projection: am5map.geoMercator(),
+          panX: "translateX",
+          panY: "translateY",
+          wheelX: "zoomX",
+          wheelY: "zoomY"
+        })
+      );
+
+      var series = chart.series.push(
+        am5map.MapPolygonSeries.new(root, {
+          geoJSON: am5geodata_worldLow,
+          exclude: ["AQ"]
+        })
+      );
+
+      series.mapPolygons.template.setAll({
+        interactive: true,
+        fill: am5.color(0xECEFF3),
+        stroke: am5.color(0xffffff),
+        strokeWidth: 0.6,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{name}"
+        })
+      });
+
+      // ----- Color by continent -----
+      series.mapPolygons.template.adapters.add("fill", function(fill, target){
+
+        if(!target.dataItem) return fill;
+
+        var id = target.dataItem.get("id") || "";
+        id = id.toUpperCase();
+
+        // from global mapping file
+        var ISO2 = window.ISO2_TO_CONTINENT || {};
+        var cont = ISO2[id] || "";
+
+        if(!cont) return fill;
+
+        return baseColor(cont);
+      });
+
+      // ----- Tooltip -----
+      series.mapPolygons.template.adapters.add("tooltipText", function(txt, target){
+
+        if(!target.dataItem) return "{name}";
+
+        var id = target.dataItem.get("id") || "";
+        id = id.toUpperCase();
+
+        var ISO2 = window.ISO2_TO_CONTINENT || {};
+        var cont = ISO2[id] || "";
+
+        if(!cont) return "{name}";
+
+        var value = continentCount[cont] || 0;
+
+        return "{name}\n" + cont + ": " + value + " responses";
+      });
+
+      chart.set("zoomControl", am5map.ZoomControl.new(root, {}));
+    });
+
+  })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Travel Style (Pie)</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- amCharts v5 -->
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+  <style>
+    #chartdiv {
+      width: 100%;
+      height: 520px;
+      overflow: visible;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <%- include('partials/navbar') %>
+
+  <div class="container py-4">
+    <a href="/success">← Back</a>
+
+    <div class="card shadow-sm border-0 mt-3">
+      <div class="card-body p-4">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2">
+          <div>
+            <h1 class="h4 mb-1">Travel Style Distribution</h1>
+            <p class="text-muted mb-0">Hover a slice to see the full option and count.</p>
+          </div>
+          <a class="btn btn-outline-secondary" href="/">New Response</a>
+        </div>
+
+        <hr class="my-3">
+
+        <div id="chartdiv"></div>
+
+        <pre id="errbox"
+          style="display:none;margin-top:12px;color:#b91c1c;font-weight:700;white-space:pre-wrap;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Formatter-safe data injection -->
+  <script id="pieDataJson" type="application/json"><%- JSON.stringify(pieData || []) %></script>
+
+  <script>
+    function showErr(msg) {
+      const el = document.getElementById("errbox");
+      el.style.display = "block";
+      el.textContent = msg;
+    }
+
+    let pieData = [];
+    try {
+      pieData = JSON.parse(document.getElementById("pieDataJson").textContent || "[]");
+      if (!Array.isArray(pieData)) pieData = [];
+    } catch (e) {
+      pieData = [];
+    }
+
+    try {
+      am5.ready(function () {
+        var root = am5.Root.new("chartdiv");
+        root.setThemes([am5themes_Animated.new(root)]);
+        if (root._logo) root._logo.dispose();
+
+        // ✅ High-contrast palette (guaranteed)
+        const paletteHex = [
+          0x1f77b4, // blue
+          0xff7f0e, // orange
+          0x2ca02c, // green
+          0xd62728, // red
+          0x9467bd, // purple
+          0x8c564b, // brown
+          0xe377c2, // pink
+          0x17becf, // cyan
+          0xbcbd22, // olive
+          0x7f7f7f  // gray
+        ];
+        const palette = paletteHex.map(h => am5.color(h));
+
+        var chart = root.container.children.push(
+          am5percent.PieChart.new(root, {
+            layout: root.verticalLayout,
+            paddingTop: 10,
+            paddingBottom: 0,
+            paddingLeft: 40,
+            paddingRight: 40
+          })
+        );
+
+        var series = chart.series.push(
+          am5percent.PieSeries.new(root, {
+            valueField: "value",
+            categoryField: "category",
+            alignLabels: true
+          })
+        );
+
+        // ✅ Force the palette here (THIS is the key)
+        series.get("colors").set("colors", palette);
+
+        series.data.setAll(pieData);
+
+        // ✅ Leave room for outer labels
+        series.set("radius", am5.percent(78));
+
+        // ✅ Clean labels: ONLY percent (avoid cutting long category text)
+        series.labels.template.setAll({
+          text: "{valuePercentTotal.formatNumber('0.0')}%",
+          oversizedBehavior: "wrap",
+          maxWidth: 90
+        });
+
+        series.ticks.template.setAll({
+          strokeOpacity: 0.35,
+          length: 8
+        });
+
+        // ✅ Tooltip shows full detail
+        series.slices.template.setAll({
+          tooltipText: "{category}: {value}\n({valuePercentTotal.formatNumber('0.0')}%)"
+        });
+
+        // ✅ Legend: Category + value + percent (clean & readable)
+        var legend = chart.children.push(
+          am5.Legend.new(root, {
+            centerX: am5.p50,
+            x: am5.p50,
+            marginTop: 14,
+            marginBottom: 0
+          })
+        );
+
+        legend.labels.template.setAll({ text: "{category}" });
+        legend.valueLabels.template.setAll({
+          text: "{value} ({valuePercentTotal.formatNumber('0.0')}%)"
+        });
+        legend.data.setAll(series.dataItems);
+
+        series.appear(900, 100);
+      });
+    } catch (e) {
+      showErr("Pie chart crashed:\n" + (e && e.stack ? e.stack : String(e)));
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
