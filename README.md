@@ -30,10 +30,10 @@ Frontend
 TRAVEL-SURVEY/
 │
 ├── models/
-│ └── Survey.js → MongoDB schema
+│ └── Survey.js # MongoDB schema
 │
 ├── routes/
-│ └── surveyRoutes.js → Express route handlers
+│ └── surveyRoutes.js # Express route handlers
 │
 ├── public/
 │ ├── css/
@@ -44,14 +44,15 @@ TRAVEL-SURVEY/
 ├── views/
 │ ├── partials/
 │ │ └── navbar.ejs
-│ ├── bar.ejs
 │ ├── form.ejs
-│ ├── map.ejs
+│ ├── bar.ejs
 │ ├── pie.ejs
+│ ├── map.ejs
 │ └── success.ejs
 │
-├── app.js → Main server file
+├── app.js # Main server file
 ├── package.json
+├── package-lock.json
 └── TravelData.json
 
 
