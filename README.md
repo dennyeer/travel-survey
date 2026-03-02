@@ -60,6 +60,8 @@ TRAVEL-SURVEY/
 ---
 
 ## 🚀 How to Run the Application
+Note: The `node_modules` directory is not included in the repository.
+Dependencies can be installed locally using `npm install`.
 
 ### 1️⃣ Install Node.js
 
@@ -90,10 +92,11 @@ If MongoDB is not running, start it before running the app.
 ---
 
 ### 4️⃣ Run the server
-node app.js
-Or:
-npx nodemon app.js
+Development mode:
+npm run dev
 
+Production mode:
+npm start
 ---
 
 ### 5️⃣ Open in Browser
