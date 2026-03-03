@@ -56,7 +56,6 @@ TRAVEL-SURVEY/
 └── TravelData.json
 ```
 
-
 ---
 
 ## 🚀 How to Run the Application
@@ -74,7 +73,9 @@ Check version:
 
 ### 2️⃣ Install dependencies
 
-Inside the project folder:
+Open the root directory in VSCode
+
+Inside the project folder，Create a new terminal and input:
 `npm install`
 
 ---
@@ -86,12 +87,13 @@ Ensure MongoDB is running locally.
 The connection string used:
 `mongodb://127.0.0.1:27017/surveyDB`
 
+Import `TravelData.json` to Collection `surveyDB\surveys` in MongoDBCompass
 
 If MongoDB is not running, start it before running the app.
 
 ---
 
-### 4️⃣ Run the server
+### 4️⃣ Run the server in VSCode
 Development mode:
 `npm run dev`
 
@@ -100,7 +102,7 @@ Production mode:
 
 ---
 
-### 5️⃣ Open in Browser
+### 5️⃣ Open in Chrome(Do not open in Internet Explorer)
 
 Visit:
 http://localhost:3000
